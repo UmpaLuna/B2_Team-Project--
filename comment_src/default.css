@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    display: grid;
+    place-content: center center;
+    height: 100vh;
+}
+
+ol,ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+a,button {
+    all: unset;
+}
+img {
+    vertical-align: top;
+    width: 100%;
+}
