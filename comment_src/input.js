@@ -48,6 +48,7 @@ function addCommentFunc(event) {
  
   // 불합격하면 반환
   if (!isValidateInfo($userName, $userPwd, $commentText)) return;
+
   printingComment($userName,$userPwd,$commentText)
 }
 
@@ -64,7 +65,7 @@ function isValidateInfo(name, pwd, text) {
 }
 
 function printingComment(name, pwd, text) {
-    $commentContainer.innerHTML = '' 
+    
    const today = commentDate(); 
    const datas = setGetLocalStorage(name,pwd,text,today)
 
@@ -89,8 +90,15 @@ function setGetLocalStorage(name,pwd,text,today){
     text: text.value,
     date: today,
  }
+ // deleteEventFunc 때문에 추가한 조건문
+ if( Object.keys(info).length === 0) return;
+
   localStorageArray.unshift(info);
-  const convertJson = JSON.stringify(localStorageArray);
+
+  //id 부여해줘야 나중에 delete, edit 해주려고
+  const newLocalStorageArray = grantedId(localStorageArray);
+
+  const convertJson = JSON.stringify(newLocalStorageArray);
   localStorage.setItem("data",convertJson);
 
   // globe 변수 localStorageArray를 리턴함
@@ -104,16 +112,17 @@ function getLocalStorageData() {
    if(getData === null || getData ===undefined) return
 
    localStorageArray = JSON.parse(getData)
-   return localStorageArray;
+   const idGrantedLocalStorageArray = grantedId(localStorageArray);
+   return idGrantedLocalStorageArray;
 }
 
 // 실질적으로 local에서 받아와서 뿌리는 함수임
 function printingTemplate(info){
-    console.log(info)
+    $commentContainer.innerHTML = '' 
     info.forEach((data,i)=>{
         const template = 
         `
-        <li class="comment-container" data-id =${i}>
+        <li class="comment-container">
         <div class="comment-view">
           <div class="comment-view-container">
             <div class="comment-info">
@@ -122,10 +131,7 @@ function printingTemplate(info){
                 <span class="fullName">${data.name}</span>
                 <div class="comment-date">${data.date}</div>
               </div>
-              <div class="comment-func_container">
-                <span class="comment-delte_container">
-                  <i class="fa-solid fa-trash"></i>
-                </span>
+              <div class="comment-func_container" data-id =${i}>
                 <span class="comment-edit_container">
                   <i class="fa-solid fa-pen"></i>
                 </span>
@@ -138,6 +144,58 @@ function printingTemplate(info){
         </div>
       </li>
         `
-        $commentContainer.insertAdjacentHTML("afterbegin", template);
+        $commentContainer.insertAdjacentHTML("beforeend", template);
     })
+    
+    // delete,edit은 따로 이벤트 등록해주려고 따로 뺌..... (사실 내 능력 부족..)
+    let $commentFuncContainer = document.querySelectorAll(".comment-func_container")
+    $commentFuncContainer.forEach((target,i)=>{
+        const deleteSpanTag = createCommentDeleteTag()
+        target.append(deleteSpanTag)
+    })
+}
+
+function createCommentDeleteTag(){
+    const deleteSpan = document.createElement("span");
+    const deleteIcon = '<i class="fa-solid fa-trash"></i>'
+    deleteSpan.setAttribute("class","comment-delte_container");
+    deleteSpan.innerHTML = deleteIcon
+
+    deleteSpan.addEventListener("click",deleteFunc);
+    return deleteSpan
+}
+
+
+function deleteFunc(event){
+    const checkPwd = prompt("비번입력하쇼");
+    const id = this.parentElement.dataset.id;
+    const targetIndex =localStorageArray.findIndex(target=>{
+             return  target.pwd === checkPwd && target.id === id 
+    })
+    // 비번 틀리면  관둬야지...
+    if(targetIndex === -1) return 
+    
+    // 비번안틀리면 이 아래 코드 실행해서 삭제 해주고 다시 그려주자
+    deleteEvent(this)
+    localStorageArray.splice(targetIndex,1);
+   
+    // id다시 부여해줘야지 
+    const newLocalStorageArray =  grantedId(localStorageArray)
+    const convertJson = JSON.stringify(newLocalStorageArray);
+    localStorage.setItem("data",convertJson);
+
+
+    const datas = getLocalStorageData();
+    printingTemplate(datas);
+}
+
+function deleteEvent(target){
+    target.removeEventListener("click",deleteFunc)
+}
+
+function grantedId(array){
+    array.forEach((data,i)=>{
+        data.id = `${i}`;
+    })
+    return array
 }
