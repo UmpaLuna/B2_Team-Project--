@@ -39,7 +39,6 @@ function initPrint() {
 
 function addCommentFunc(event) {
     event.preventDefault();
-    console.log(event.target.value)
     const $userName = document.querySelector(".input-name");
     const $userPwd = document.querySelector(".input-pwd");
 
@@ -207,7 +206,12 @@ function editPrintingHtml(event) {
 
     findedEditCommentContainer.children[0].children[0].append(editForm);
 
-    // targetArray[targetIndex].innerHTML = 
+    // 수정시 textarea의 value값을 기존 value 값으로 보여주는 코드
+    let textAreaPreValue = findedEditCommentContainer.children[0].children[0].children[1].children[1];
+    textAreaPreValue.value = targetedLocalStorageData.text
+    
+  
+   
 }
 
 // EditButton 관련 함수들 End ---------------
@@ -241,11 +245,8 @@ function cretaeCommentUpdateForm(index){
     updateForm.insertAdjacentHTML("beforeend",updateTextarea);
     updateForm.addEventListener("submit",function(e){
         e.preventDefault();
-        
         updateEvent(this,index);
     });
-    
-
     return updateForm  
 }
 
@@ -286,8 +287,8 @@ function deleteFunc(event) {
     if (targetIndex === -1) return
 
     // 비번안틀리면 이 아래 코드 실행해서 삭제 해주고 다시 그려주자
-    deleteEvent(this, "click", deleteFunc);
-
+    deleteEvent(this, "click", deleteFunc); // deleteEvent
+    deleteEvent(this, "click", editPrintingHtml)// eidtEvent
     localStorageArray.splice(targetIndex, 1);
 
     // id다시 부여해줘야지 
@@ -301,7 +302,7 @@ function deleteFunc(event) {
 }
 
 function deleteEvent(target, eventType, funcName) {
-    target.removeEventListener("click", deleteFunc)
+    target.removeEventListener(eventType, funcName)
 }
 
 
