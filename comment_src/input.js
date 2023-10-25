@@ -1,27 +1,25 @@
 const $commentContainer = document.querySelector("#comment");
 const $form = document.querySelector(".input-container");
-
-let localStorageArray = [];
-initPrint();
-
-
-// 코멘트 한글자라도 있으면 버튼 활성화,댓글 하나라도 있으면 전송버튼 활성화 시켜서 UX로 알려주자 - 전역임
 const $commentText = document.querySelector(".comment-text.add-comment");
 const $formSubmitBtn = document.querySelector(".form-btn");
+let localStorageArray = [];
+
+// 브라우저 키면 처음 그려주기
+initPrint();
+
+// 코멘트 한글자라도 있으면 버튼 활성화,댓글 하나라도 있으면 전송버튼 활성화 시켜서 UX로 알려주자 - 전역으로 해줘야징 ㅎㅎ
 $commentText.addEventListener("input",(e)=>{
     $commentText.value.trim() !=='' ? $formSubmitBtn.classList.add("submit") : $formSubmitBtn.classList.remove("submit");
   })
 
-
-
-
-
-// 실시간으로 감시를 해줘야 할까?
-// form의 username과 pwd, text가 빈 문자열과 유효성검사에 합격 하면
-//localStorage에 배열의 오브젝트에 저장 후 댓글 추가
-
-// 유효성 검사 빈배열이면 return false 해주기
+// 댓글 달기
 $form.addEventListener("submit", addCommentFunc);
+
+
+
+
+
+
 
 
 
@@ -148,12 +146,28 @@ function printingTemplate(info){
     })
     
     // delete,edit은 따로 이벤트 등록해주려고 따로 뺌..... (사실 내 능력 부족..)
-    let $commentFuncContainer = document.querySelectorAll(".comment-func_container")
+    let $commentFuncContainer = document.querySelectorAll(".comment-func_container");
     $commentFuncContainer.forEach((target,i)=>{
         const deleteSpanTag = createCommentDeleteTag()
         target.append(deleteSpanTag)
     })
 }
+// Edit 관련 함수들 Start ---------------
+
+function createCommentEditTag(){
+    const editSpan = document.createElement("span");
+    const editIcon = '<i class="fa-solid fa-pen"></i>'
+    editSpan.setAttribute("class","comment-edit_container");
+    editSpan.innerHTML = editIcon;
+
+    editSpan.addEventListener("click",editFunc)
+}
+
+function editFunc(){
+
+}
+
+// Delete 관련 함수들 Start---------------
 
 function createCommentDeleteTag(){
     const deleteSpan = document.createElement("span");
@@ -176,7 +190,7 @@ function deleteFunc(event){
     if(targetIndex === -1) return 
     
     // 비번안틀리면 이 아래 코드 실행해서 삭제 해주고 다시 그려주자
-    deleteEvent(this)
+    deleteEvent(this,"click",deleteFunc)
     localStorageArray.splice(targetIndex,1);
    
     // id다시 부여해줘야지 
@@ -189,9 +203,12 @@ function deleteFunc(event){
     printingTemplate(datas);
 }
 
-function deleteEvent(target){
+function deleteEvent(target,eventType,funcName){
     target.removeEventListener("click",deleteFunc)
 }
+
+
+// Delete 관련 함수들 End-----------------
 
 function grantedId(array){
     array.forEach((data,i)=>{
