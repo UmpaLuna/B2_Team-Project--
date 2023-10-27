@@ -20,9 +20,7 @@ $commentText.addEventListener("input", (e) => {
 // 댓글 달기
 $form.addEventListener("submit", addCommentFunc);
 
-// 처음 렌더링 할 때 5개 이상이면 pagination
-// 수정 할때 맨 첫번 째 보이게 하기
-// 삭제 하면 현재 페이지를 다시 리 렌더링 하기
+
 
 function initPrint() {
   const datas = getLocalStorageData();
@@ -41,8 +39,8 @@ function render(currentPage = 1) {
   grantedId(datas);
   if (datas.length <= 5) return printingTemplate(datas);
 
-  const pageCount = 5; // 화면에 나타날 페이지 갯수
-  const commentsCount = 5; //한 페이지당 나타낼 댓글 갯수
+  const pageCount = 3; // 화면에 나타날 페이지 갯수
+  const commentsCount = 3; //한 페이지당 나타낼 댓글 갯수
   let totalCount = datas.length;
 
   let totalPage = Math.ceil(totalCount / commentsCount); // 전체 페이지 수 - '5'개 씩 끊은것
@@ -88,7 +86,7 @@ function render(currentPage = 1) {
   if (last < totalPage) {
     const endPageBtn = document.createElement("button");
     endPageBtn.setAttribute("class", "button");
-    endPageBtn.classList.add("next");
+     endPageBtn.classList.add("next");
     endPageBtn.dataset.pageNum = "endPage";
     endPageBtn.innerHTML = `&gt;&gt;`;
 
@@ -399,14 +397,15 @@ function cretaeCommentUpdateForm(index) {
 const updateEvent = (targetForm, index) => {
   // 걍 editButton 누르면 생성된 textarea의 value임
   const validatedTargetText = targetForm.children[1].value;
+
+  // 수정 후 현재 currentPage에 그대로 있기 위한 Logic임
   const convertFindingBtn = [...$pagingBtnContainer.children];
-  console.log(convertFindingBtn)
   const findingCurrentPage = convertFindingBtn.filter((target) => {
     return target.classList.contains("active");
   });
-  console.log(findingCurrentPage)
+
   const currentPage = findingCurrentPage[0].innerText;
-  console.log(currentPage)
+
   if (validatedTargetText.trim() === "") {
     render(currentPage);
     return;
@@ -414,10 +413,7 @@ const updateEvent = (targetForm, index) => {
 
   localStorageArray[index].text = validatedTargetText;
   setLocalStorage(localStorageArray);
-
   render(currentPage);
-  // const updateLocalStorageDatas = getLocalStorageData();
-  // printingTemplate(updateLocalStorageDatas);
 };
 
 // Delete 관련 함수들 Start---------------
@@ -428,31 +424,36 @@ function createCommentDeleteTag() {
   deleteSpan.setAttribute("class", "comment-delte_container");
   deleteSpan.innerHTML = deleteIcon;
 
-  deleteSpan.addEventListener("click", deleteFunc);
+  deleteSpan.addEventListener("click", deleteEventFunc);
   return deleteSpan;
 }
 
-function deleteFunc(event) {
+function deleteEventFunc(event) {
   const checkPwd = prompt("비번입력하쇼");
   const id = this.parentElement.dataset.id;
-  const targetIndex = localStorageArray.findIndex((target) => {
-    return target.pwd === checkPwd && target.id === id;
+   const targetLocalStorageIndex = localStorageArray.findIndex((target, i) => {
+    return target.pwd === checkPwd && localStorageArray[i].id === id;
   });
   // 비번 틀리면  관둬야지...
-  if (targetIndex === -1) return;
+  if (targetLocalStorageIndex === -1) return alert('틀림');
 
   // 비번안틀리면 이 아래 코드 실행해서 삭제 해주고 다시 그려주자
-  deleteEvent(this, "click", deleteFunc); // deleteEvent
+  deleteEvent(this, "click", deleteEventFunc); // deleteEvent
   deleteEvent(this, "click", editPrintingHtml); // eidtEvent
-  localStorageArray.splice(targetIndex, 1);
+  localStorageArray.splice(targetLocalStorageIndex, 1);
 
   // id다시 부여해줘야지 -> 삭제 했으니까 짜식아!!!!
   const newLocalStorageArray = grantedId(localStorageArray);
-  const convertJson = JSON.stringify(newLocalStorageArray);
-  localStorage.setItem("data", convertJson);
+  setLocalStorage(newLocalStorageArray)
 
-  const datas = getLocalStorageData();
-  printingTemplate(datas);
+  const convertFindingBtn = [...$pagingBtnContainer.children];
+  const findingCurrentPage = convertFindingBtn.filter((target) => {
+    return target.classList.contains("active");
+  });
+
+  const currentPage = findingCurrentPage[0].innerText;
+  // 4번 버튼에서 요소가 하나 있는데, 그걸 삭제하면 그 이전 페이지로 다시 그려주는 예외 처리까지 겸한 코드
+  $commentContainer.children.length <=1 ? render(currentPage - 1) : render(currentPage);
 }
 
 function deleteEvent(target, eventType, funcName) {
