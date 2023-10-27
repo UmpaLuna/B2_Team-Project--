@@ -174,7 +174,7 @@ function addCommentFunc(event) {
   const $userPwd = document.querySelector(".input-pwd");
 
   // 불합격하면 반환
-  if (!isValidateInfo($userName, $userPwd, $commentText)) return;
+  if (!isValidateInfo($userName, $userPwd, $commentText)) return alert("");
 
   printingComment($userName, $userPwd, $commentText);
 }
@@ -197,7 +197,7 @@ function printingComment(name, pwd, text) {
   const datas = setGetLocalStorage(name, pwd, text, today);
 
   // printingTemplate(datas);
-  render(datas);
+  render();
   $form.reset();
 }
 
@@ -452,7 +452,7 @@ function deleteEventFunc(event) {
   });
 
   const currentPage = findingCurrentPage[0].innerText;
-  // 4번 버튼에서 요소가 하나 있는데, 그걸 삭제하면 그 이전 페이지로 다시 그려주는 예외 처리까지 겸한 코드
+  // 4번 버튼에서 요소가 하나 있는데, 그걸 삭제하면 그 이전 페이지로 다시 그려주는 예외 처리까지 겸한
   $commentContainer.children.length <=1 ? render(currentPage - 1) : render(currentPage);
 }
 
